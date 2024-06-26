@@ -2,6 +2,11 @@ import pygame
 from sys import exit
 from random import randint
 
+# TODO
+# Resize board to 600x600
+# Resize player to 60x60
+#
+
 pygame.init()   # Initialize the game
 screen = pygame.display.set_mode((800, 600))    # Main screen object
 pygame.display.set_caption("Snakes&Ladders")    # Title for the window
@@ -28,17 +33,20 @@ player1_rect = player1_surface.get_rect(bottomleft=(0, 600))
 switch = True
 clicked = False
 clickable = True
+move = False
+num = 0
+target_pos = 0
 
 while True:     # Run the game loop
     for event in pygame.event.get():        # game exit event
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if event.type == pygame.MOUSEMOTION:
-            print(event.pos)
+        # if event.type == pygame.MOUSEMOTION:
+        #     print(event.pos)
         if event.type == pygame.MOUSEBUTTONDOWN:
             if play_button_rect.collidepoint(event.pos):
-                print('hit')
+                # print('hit')
                 clicked = True
 
         if event.type == pygame.MOUSEBUTTONUP:
@@ -54,29 +62,46 @@ while True:     # Run the game loop
     if clicked:
         screen.blit(play_pressed_surface, play_pressed_rect)
         if clickable:
+            clickable = False
             num = randint(1, 6)
             current_image = dice_images[num - 1]
-            clickable = False
+            target_pos = player1_rect.left + (num * 60)
+            move = True
+            print(f"current_pos: {player1_rect.left}")
+            print(f"target pos: {target_pos}")
+            print(f"move: {move}")
     else:
         screen.blit(play_button_surface, play_button_rect)
-        clickable = True
 
     screen.blit(current_image, dice_rect)
 
     if switch:
-        player1_rect.left += 5
-    else:
-        player1_rect.left -= 5
+        if move:
+            if player1_rect.left < target_pos and player1_rect.right > 570:
+                switch = False
+            if player1_rect.left < target_pos:
+                player1_rect.left += 5
+            else:
+                move = False
+                clickable = True
+                target_pos = 0
 
-    if player1_rect.right > 600:
-        player1_rect.bottom -= 61
-        switch = False
-    elif player1_rect.left < 0:
-        player1_rect.bottom -= 60
-        switch = True
+    else:
+        if move:
+            if player1_rect.right > target_pos:
+                player1_rect.left -= 5
+            else:
+                move = False
+
+    # if player1_rect.right > 600:
+    #     player1_rect.bottom -= 61
+    #     switch = False
+    # elif player1_rect.left < 0:
+    #     player1_rect.bottom -= 60
+    #     switch = True
 
     pygame.display.update()                 # change the frame
-    clock.tick(30)                          # upper limit of the frame rate
+    clock.tick(60)                          # upper limit of the frame rate
 
 
 # import pygame
