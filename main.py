@@ -16,6 +16,7 @@ play_pressed_image = "resources/Play_down.png"
 play_button_position = (700, 550)
 dice_position = (700, 400)
 player_image = "resources/Pieces/player1.png"
+ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
 
 
 class Dice:
@@ -52,17 +53,23 @@ class Player:
 
     def move(self):
         if self.position % 10 == 0:
-            self.player_rect.bottom -= 1
+            self.player_rect.bottom -= 5
             if self.player_rect.bottom % 60 == 0:
                 self.position += 1
         else:
             if (self.position // 10) % 2 == 0:
-                self.player_rect.left += 1
+                self.player_rect.left += 5
             else:
-                self.player_rect.left -= 1
+                self.player_rect.left -= 5
 
             if self.player_rect.left % 60 == 0:
                 self.position += 1
+
+    def check_ladders(self):
+        for key in ladders:
+            if self.position == key:
+                self.target_pos = ladders[key]
+                break
 
 
 class Button:
@@ -135,6 +142,8 @@ def main():
         dice.render_dice()
         if player.position < player.target_pos:
             player.move()
+        elif player.position == player.target_pos:
+            player.check_ladders()
 
         pygame.display.update()  # change the frame
         clock.tick(60)  # upper limit of the frame rate
