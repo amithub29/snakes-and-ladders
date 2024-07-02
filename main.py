@@ -17,6 +17,7 @@ play_button_position = (700, 550)
 dice_position = (700, 400)
 player_image = "resources/Pieces/player1.png"
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
+snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
 
 
 class Dice:
@@ -41,7 +42,7 @@ class Player:
         self.player_x = 0
         self.player_y = 600
         self.position = 1
-        self.target_pos = 0
+        self.target_pos = 1
         self.switch = False
         self.screen = screen
         self.player_surface = pygame.image.load(player_image).convert_alpha()
@@ -70,6 +71,26 @@ class Player:
             if self.position == key:
                 self.target_pos = ladders[key]
                 break
+
+    def check_snakes(self):
+        for key in snakes:
+            if self.position == key:
+                self.target_pos = snakes[key]
+                break
+
+    def reverse_move(self):
+        if (self.position - 1) % 10 == 0:
+            self.player_rect.bottom += 5
+            if self.player_rect.bottom % 60 == 0:
+                self.position -= 1
+        else:
+            if ((self.position - 1) // 10) % 2 == 0:
+                self.player_rect.left -= 5
+            else:
+                self.player_rect.left += 5
+
+            if self.player_rect.left % 60 == 0:
+                self.position -= 1
 
 
 class Button:
@@ -140,58 +161,17 @@ def main():
         player.render_static_player()
         button.render_button()
         dice.render_dice()
-        if player.position < player.target_pos:
-            player.move()
-        elif player.position == player.target_pos:
+        if player.position == player.target_pos:
             player.check_ladders()
+            player.check_snakes()
+        elif player.position > player.target_pos:
+            player.reverse_move()
+        elif player.position < player.target_pos:
+            player.move()
 
         pygame.display.update()  # change the frame
         clock.tick(60)  # upper limit of the frame rate
 
-        #    screen.blit(dice_surface1, dice_rect1)
-
-        # if clicked:
-        #     screen.blit(play_pressed_surface, play_pressed_rect)
-        #     if clickable:
-        #         clickable = False
-        #         num = randint(1, 6)
-        #         current_image = dice_images[num - 1]
-        #         target_pos = player1_rect.left + (num * 60)
-        #         move = True
-        #         print(f"current_pos: {player1_rect.left}")
-        #         print(f"target pos: {target_pos}")
-        #         print(f"move: {move}")
-        # else:
-        #     screen.blit(play_button_surface, play_button_rect)
-        #
-        # screen.blit(current_image, dice_rect)
-        #
-        # if switch:
-        #     if move:
-        #         if player1_rect.left < target_pos and player1_rect.right > 570:
-        #             switch = False
-        #         if player1_rect.left < target_pos:
-        #             player1_rect.left += 5
-        #         else:
-        #             move = False
-        #             clickable = True
-        #             target_pos = 0
-        #
-        # else:
-        #     if move:
-        #         if player1_rect.right > target_pos:
-        #             player1_rect.left -= 5
-        #         else:
-        #             move = False
-
-        # if player1_rect.right > 600:
-        #     player1_rect.bottom -= 61
-        #     switch = False
-        # elif player1_rect.left < 0:
-        #     player1_rect.bottom -= 60
-        #     switch = True
-
 
 if __name__ == '__main__':
     main()
-
