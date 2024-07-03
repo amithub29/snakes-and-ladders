@@ -6,7 +6,9 @@ board_size = (800, 600)
 window_title = "Snakes&Ladders"
 font_name = "fonts/MagicSaturday-rg1OA.ttf"
 font_size = 50
+text_position = (625, 50)
 main_board_image = "images/background-main.jpg"
+game_over_image = "images/background-reset.png"
 side_panel_size = (200, 600)
 side_panel_color = (0, 20, 40)
 side_panel_text = "Player 1"
@@ -17,7 +19,8 @@ play_button_position = (700, 550)
 dice_position = (700, 400)
 player_image = "resources/Pieces/player1.png"
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
-snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
+#snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
+snakes = {}
 
 
 class Dice:
@@ -57,6 +60,7 @@ class Player:
             self.player_rect.bottom -= 5
             if self.player_rect.bottom % 60 == 0:
                 self.position += 1
+                print(self.position)
         else:
             if (self.position // 10) % 2 == 0:
                 self.player_rect.left += 5
@@ -65,6 +69,7 @@ class Player:
 
             if self.player_rect.left % 60 == 0:
                 self.position += 1
+                print(self.position)
 
     def check_ladders(self):
         for key in ladders:
@@ -113,16 +118,21 @@ class Button:
 class Board:
     def __init__(self, screen):
         self.screen = screen
+        self.running = True
         self.board_surface = pygame.image.load(main_board_image).convert()  # Main board surface
         self.side_panel_surface = pygame.Surface(side_panel_size).convert()  # Side Panel surface
         self.side_panel_surface.fill(side_panel_color)  # Color of side panel
         self.font = pygame.font.Font(font_name, font_size)  # Font
         self.font_surface = self.font.render(side_panel_text, True, side_panel_text_color)  # Font surface
+        self.game_over_surface = pygame.image.load(game_over_image).convert()
 
     def render_board(self):
         self.screen.blit(self.board_surface, (0, 0))  # update the board
         self.screen.blit(self.side_panel_surface, (600, 0))  # update the side panel
-        self.screen.blit(self.font_surface, (625, 50))
+        self.screen.blit(self.font_surface, text_position)   # update the font
+
+    def render_gameover(self):
+        self.screen.blit(self.game_over_surface, (0, 0))
 
 
 switch = True
@@ -152,16 +162,23 @@ def main():
                 if button.play_button_rect.collidepoint(event.pos):
                     button.clicked = True
                     dice.roll_dice()
-                    player.target_pos = player.position + dice.number
+                    if player.position + dice.number <= 100:
+                        player.target_pos = player.position + dice.number
 
             if event.type == pygame.MOUSEBUTTONUP:
                 button.clicked = False
 
-        board.render_board()
-        player.render_static_player()
-        button.render_button()
-        dice.render_dice()
-        if player.position == player.target_pos:
+        if board.running:
+            board.render_board()
+            player.render_static_player()
+            button.render_button()
+            dice.render_dice()
+        else:
+            board.render_gameover()
+
+        if player.position == 100:
+            board.running = False
+        elif player.position == player.target_pos:
             player.check_ladders()
             player.check_snakes()
         elif player.position > player.target_pos:
