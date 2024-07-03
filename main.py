@@ -20,8 +20,7 @@ dice_position = (700, 400)
 player1_image = "resources/Pieces/player1.png"
 player2_image = "resources/Pieces/player2.png"
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
-#snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
-snakes = {}
+snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
 
 
 class Dice:
@@ -42,19 +41,16 @@ class Dice:
 
 
 class Player:
-    def __init__(self, screen, image):
+    def __init__(self, screen, image, location):
         self.image = image
-        self.player_x = 0
-        self.player_y = 600
         self.position = 1
         self.target_pos = 1
         self.switch = False
         self.screen = screen
         self.player_surface = pygame.image.load(self.image).convert_alpha()
-        self.player_rect = self.player_surface.get_rect(bottomleft=(self.player_x, self.player_y))
+        self.player_rect = self.player_surface.get_rect(bottomleft=location)
 
-    def render_static_player(self):
-        self.screen.blit(self.player_surface, (710, 45))
+    def render_player(self):
         self.screen.blit(self.player_surface, self.player_rect)
 
     def move(self):
@@ -98,6 +94,9 @@ class Player:
 
             if self.player_rect.left % 60 == 0:
                 self.position -= 1
+
+    def render_static_piece(self):
+        self.screen.blit(self.player_surface, (710, 45))
 
 
 class Button:
@@ -152,8 +151,8 @@ def main():
 
     board = Board(screen)
     button = Button(screen)
-    player1 = Player(screen, player1_image)
-    player2 = Player(screen, player2_image)
+    player1 = Player(screen, player1_image, (0, 600))
+    player2 = Player(screen, player2_image, (0, 600))
     dice = Dice(screen)
     player = player1
 
@@ -180,8 +179,9 @@ def main():
 
         if board.running:
             board.render_board()
-            player1.render_static_player()
-            player2.render_static_player()
+            player1.render_player()
+            player2.render_player()
+            player.render_static_piece()
             button.render_button()
             dice.render_dice()
         else:
