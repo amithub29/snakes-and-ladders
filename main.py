@@ -17,7 +17,8 @@ play_button_image = "resources/Play.png"
 play_pressed_image = "resources/Play_down.png"
 play_button_position = (700, 550)
 dice_position = (700, 400)
-player_image = "resources/Pieces/player1.png"
+player1_image = "resources/Pieces/player1.png"
+player2_image = "resources/Pieces/player2.png"
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
 #snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
 snakes = {}
@@ -41,14 +42,15 @@ class Dice:
 
 
 class Player:
-    def __init__(self, screen):
+    def __init__(self, screen, image):
+        self.image = image
         self.player_x = 0
         self.player_y = 600
         self.position = 1
         self.target_pos = 1
         self.switch = False
         self.screen = screen
-        self.player_surface = pygame.image.load(player_image).convert_alpha()
+        self.player_surface = pygame.image.load(self.image).convert_alpha()
         self.player_rect = self.player_surface.get_rect(bottomleft=(self.player_x, self.player_y))
 
     def render_static_player(self):
@@ -117,6 +119,7 @@ class Button:
 
 class Board:
     def __init__(self, screen):
+        self.turn = True
         self.screen = screen
         self.running = True
         self.board_surface = pygame.image.load(main_board_image).convert()  # Main board surface
@@ -149,19 +152,26 @@ def main():
 
     board = Board(screen)
     button = Button(screen)
-    player = Player(screen)
+    player1 = Player(screen, player1_image)
+    player2 = Player(screen, player2_image)
     dice = Dice(screen)
+    player = player1
 
     while True:  # Run the game loop
         for event in pygame.event.get():  # game exit event
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button.play_button_rect.collidepoint(event.pos):
                     button.clicked = True
                     dice.roll_dice()
+                    if board.turn:
+                        player = player1
+                    else:
+                        player = player2
+                    if dice.number != 6:
+                        board.turn = not board.turn
                     if player.position + dice.number <= 100:
                         player.target_pos = player.position + dice.number
 
@@ -170,7 +180,8 @@ def main():
 
         if board.running:
             board.render_board()
-            player.render_static_player()
+            player1.render_static_player()
+            player2.render_static_player()
             button.render_button()
             dice.render_dice()
         else:
