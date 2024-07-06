@@ -4,24 +4,30 @@ from random import randint
 
 board_size = (800, 600)
 window_title = "Snakes&Ladders"
-font_name = "fonts/Nightday.otf"
-font_size = 60
-text_position = (625, 100)
+font_name = "fonts/HighlandGothicLightFLF.ttf"
+font_size = 40
+text_position = (625, 75)
+game_over_text_pos = (280, 250)
+game_over_screen_color = (40, 40, 40)
 main_board_image = "images/background-main.jpg"
-game_over_image = "images/background-reset.png"
+game_over_text = "GAME OVER"
+player_win_text = "WINS"
+player_win_text_pos = (380, 320)
 side_panel_size = (200, 600)
 side_panel_color = (20, 20, 20)
-side_panel_text = "Player"
+side_panel_text = "PLAYER"
 side_panel_text_color = "Grey"
-play_button_image = "resources/Play.png"
-play_pressed_image = "resources/Play_down.png"
-play_button_position = (700, 550)
+play_button_image = "resources/Button/play.png"
+play_pressed_image = "resources/Button/play_down.png"
+play_button_position = (704, 550)
 dice_position = (700, 400)
 dice_sound = "sound/dieThrow2.ogg"
 player1_image = "resources/Pieces/player1_small.png"
 player2_image = "resources/Pieces/player2_small.png"
 static_player1_image = "resources/Pieces/player1_static.png"
 static_player2_image = "resources/Pieces/player2_static.png"
+static_player_pos = (670, 150)
+static_player_win_pos = (310, 320)
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
 snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
 
@@ -125,9 +131,12 @@ class Board:
         self.board_surface = pygame.image.load(main_board_image).convert()  # Main board surface
         self.side_panel_surface = pygame.Surface(side_panel_size).convert()  # Side Panel surface
         self.side_panel_surface.fill(side_panel_color)  # Color of side panel
+        self.gameover_surface = pygame.Surface(board_size).convert()  # Side Panel surface
+        self.gameover_surface.fill(game_over_screen_color)  # Color of side panel
         self.font = pygame.font.Font(font_name, font_size)  # Font
         self.font_surface = self.font.render(side_panel_text, True, side_panel_text_color)  # Font surface
-        self.game_over_surface = pygame.image.load(game_over_image).convert()
+        self.gameover_text_surface = self.font.render(game_over_text, True, side_panel_text_color)
+        self.player_win_text_surface = self.font.render(player_win_text, True, side_panel_text_color)
         self.static_player_surface = pygame.image.load(image).convert_alpha()
 
     def render_board(self):
@@ -136,17 +145,16 @@ class Board:
         self.screen.blit(self.font_surface, text_position)   # update the font
 
     def render_gameover(self):
-        self.screen.blit(self.game_over_surface, (0, 0))
+        self.screen.blit(self.gameover_surface, (0, 0))
+        self.screen.blit(self.gameover_text_surface, game_over_text_pos)
+        self.screen.blit(self.player_win_text_surface, player_win_text_pos)
+        self.static_player_surface = pygame.image.load(self.image).convert_alpha()
+        self.screen.blit(self.static_player_surface, static_player_win_pos)
 
     def render_static_piece(self):
+
         self.static_player_surface = pygame.image.load(self.image).convert_alpha()
-        self.screen.blit(self.static_player_surface, (670, 200))
-
-
-switch = True
-clicked = False
-clickable = True
-move = False
+        self.screen.blit(self.static_player_surface, static_player_pos)
 
 
 def main():
@@ -204,6 +212,7 @@ def main():
             board.render_gameover()
 
         if player.position == 100:
+            board.image = player.image
             board.running = False
         elif player.position == player.target_pos:
             player.check_ladders()
