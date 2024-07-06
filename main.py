@@ -19,6 +19,8 @@ play_button_position = (700, 550)
 dice_position = (700, 400)
 player1_image = "resources/Pieces/player1.png"
 player2_image = "resources/Pieces/player2.png"
+static_player1_image = "resources/Pieces/player1.png"
+static_player2_image = "resources/Pieces/player2.png"
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
 snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
 
@@ -95,9 +97,6 @@ class Player:
             if self.player_rect.left % 60 == 0:
                 self.position -= 1
 
-    def render_static_piece(self):
-        self.screen.blit(self.player_surface, (710, 45))
-
 
 class Button:
     def __init__(self, screen):
@@ -117,7 +116,8 @@ class Button:
 
 
 class Board:
-    def __init__(self, screen):
+    def __init__(self, screen, image):
+        self.image = image
         self.turn = True
         self.screen = screen
         self.running = True
@@ -127,6 +127,7 @@ class Board:
         self.font = pygame.font.Font(font_name, font_size)  # Font
         self.font_surface = self.font.render(side_panel_text, True, side_panel_text_color)  # Font surface
         self.game_over_surface = pygame.image.load(game_over_image).convert()
+        self.static_player_surface = pygame.image.load(image).convert_alpha()
 
     def render_board(self):
         self.screen.blit(self.board_surface, (0, 0))  # update the board
@@ -135,6 +136,10 @@ class Board:
 
     def render_gameover(self):
         self.screen.blit(self.game_over_surface, (0, 0))
+
+    def render_static_piece(self):
+        self.static_player_surface = pygame.image.load(self.image).convert_alpha()
+        self.screen.blit(self.static_player_surface, (710, 45))
 
 
 switch = True
@@ -149,7 +154,7 @@ def main():
     pygame.display.set_caption(window_title)  # Title for the window
     clock = pygame.time.Clock()  # Clock for the frame rate
 
-    board = Board(screen)
+    board = Board(screen, static_player1_image)
     button = Button(screen)
     player1 = Player(screen, player1_image, (0, 600))
     player2 = Player(screen, player2_image, (0, 600))
@@ -171,6 +176,13 @@ def main():
                         player = player2
                     if dice.number != 6:
                         board.turn = not board.turn
+                        if player == player1:
+                            print("Player1")
+                            board.image = static_player2_image
+                        elif player == player2:
+                            print("Player2")
+                            board.image = static_player1_image
+
                     if player.position + dice.number <= 100:
                         player.target_pos = player.position + dice.number
 
@@ -181,7 +193,7 @@ def main():
             board.render_board()
             player1.render_player()
             player2.render_player()
-            player.render_static_piece()
+            board.render_static_piece()
             button.render_button()
             dice.render_dice()
         else:
