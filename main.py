@@ -4,23 +4,24 @@ from random import randint
 
 board_size = (800, 600)
 window_title = "Snakes&Ladders"
-font_name = "fonts/MagicSaturday-rg1OA.ttf"
-font_size = 50
-text_position = (625, 50)
+font_name = "fonts/Nightday.otf"
+font_size = 60
+text_position = (625, 100)
 main_board_image = "images/background-main.jpg"
 game_over_image = "images/background-reset.png"
 side_panel_size = (200, 600)
-side_panel_color = (0, 20, 40)
-side_panel_text = "Player 1"
+side_panel_color = (20, 20, 20)
+side_panel_text = "Player"
 side_panel_text_color = "Grey"
 play_button_image = "resources/Play.png"
 play_pressed_image = "resources/Play_down.png"
 play_button_position = (700, 550)
 dice_position = (700, 400)
-player1_image = "resources/Pieces/player1.png"
-player2_image = "resources/Pieces/player2.png"
-static_player1_image = "resources/Pieces/player1.png"
-static_player2_image = "resources/Pieces/player2.png"
+dice_sound = "sound/dieThrow2.ogg"
+player1_image = "resources/Pieces/player1_small.png"
+player2_image = "resources/Pieces/player2_small.png"
+static_player1_image = "resources/Pieces/player1_static.png"
+static_player2_image = "resources/Pieces/player2_static.png"
 ladders = {4: 14, 9: 31, 20: 38, 28: 84, 40: 59, 51: 67, 63: 81}
 snakes = {17: 7, 64: 60, 89: 26, 95: 75, 99: 78}
 
@@ -139,7 +140,7 @@ class Board:
 
     def render_static_piece(self):
         self.static_player_surface = pygame.image.load(self.image).convert_alpha()
-        self.screen.blit(self.static_player_surface, (710, 45))
+        self.screen.blit(self.static_player_surface, (670, 200))
 
 
 switch = True
@@ -150,6 +151,8 @@ move = False
 
 def main():
     pygame.init()  # Initialize the game
+    pygame.mixer.init()
+    dice_audio = pygame.mixer.Sound(dice_sound)
     screen = pygame.display.set_mode(board_size)  # Main screen object
     pygame.display.set_caption(window_title)  # Title for the window
     clock = pygame.time.Clock()  # Clock for the frame rate
@@ -157,7 +160,7 @@ def main():
     board = Board(screen, static_player1_image)
     button = Button(screen)
     player1 = Player(screen, player1_image, (0, 600))
-    player2 = Player(screen, player2_image, (0, 600))
+    player2 = Player(screen, player2_image, (10, 600))
     dice = Dice(screen)
     player = player1
 
@@ -168,6 +171,7 @@ def main():
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button.play_button_rect.collidepoint(event.pos):
+                    dice_audio.play()
                     button.clicked = True
                     dice.roll_dice()
                     if board.turn:
@@ -191,8 +195,8 @@ def main():
 
         if board.running:
             board.render_board()
-            player1.render_player()
             player2.render_player()
+            player1.render_player()
             board.render_static_piece()
             button.render_button()
             dice.render_dice()
